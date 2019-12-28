@@ -21,6 +21,7 @@ class TTRLauncher(tk.Frame):
             updater.TTRUpdater(file.read())
         super().__init__(master)
         self.master = master
+        self.master.title('TTR MultiLauncher')
         self.master.minsize(200, 200)
         self.create_widgets()
         self.pack(expand=True)
@@ -56,6 +57,7 @@ class TTRLauncher(tk.Frame):
         if success == 'true':
             os.environ['TTR_PLAYCOOKIE'] = resp.get('cookie', 'CookieNotFound')
             os.environ['TTR_GAMESERVER'] = resp.get('gameserver', 'ServerNotFound')
+            os.chdir(os.path.dirname(os.path.realpath(__file__)))
             with open('installdir.txt', 'r') as file:
                 os.chdir(file.read())
             #Automated relogging if user requests?
