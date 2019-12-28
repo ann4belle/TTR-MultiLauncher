@@ -48,7 +48,7 @@ class TTRLauncher(tk.Frame):
             self.toonlist.insert(tk.END, acc[0])
 
     def login(self):
-        self.do_request({'username': self.accts[self.toonlist.curselection()[0] - 1][1], 'password': self.accts[self.toonlist.curselection()[0] - 1][2]})
+        self.do_request({'username': self.accts[self.toonlist.curselection()[0]][1].strip(), 'password': self.accts[self.toonlist.curselection()[0]][2].strip()})
 
     def do_request(self, data):
         resp = json.loads(requests.post('https://www.toontownrewritten.com/api/login?format=json', data=data, headers={'Content-Type': 'application/x-www-form-urlencoded'}).content)
@@ -111,8 +111,6 @@ class AcctRequestDialog(tk.Toplevel):
         self.initial_focus = self.body(body)
         body.pack(padx=5, pady=5)
         self.grab_set()
-        self.bind('<Return>', self.confirm)
-        self.bind('<Escape>', self.cancel)
         self.label = None
         self.username = None
         self.password = None
@@ -133,11 +131,13 @@ class AcctRequestDialog(tk.Toplevel):
         self.label_entry.grid(row=0, column=1)
         self.user_entry.grid(row=1, column=1)
         self.pass_entry.grid(row=2, column=1)
+        box = tk.Frame(self)
+        tk.Button(box, text='OK', width=10, command=self.confirm, default=tk.ACTIVE).pack(side=tk.LEFT)
+        tk.Button(box, text='Cancel', width=10, command=self.cancel).pack(side=tk.LEFT)
+        box.pack(side=tk.BOTTOM, padx=5, pady=5)
+        self.bind('<Return>', self.confirm)
+        self.bind('<Escape>', self.cancel)
         return self.label_entry
-
-    def buttonbox(self):
-        tk.Button(self, text='OK', width=10, command=self.confirm, default=tk.ACTIVE).grid(row=3)
-        tk.Button(self, text='Cancel', width=10, command=self.cancel).grid(row=3, column=1)
 
     def confirm(self, event=None):
         if not self.validate():
@@ -171,7 +171,6 @@ class AuthRequestDialog(tk.Toplevel):
         body = tk.Frame(self)
         self.initial_focus = self.body(body)
         body.pack(padx=5, pady=5)
-        self.buttonbox()
         self.grab_set()
         self.tg_code = None
         if not self.initial_focus:
@@ -185,14 +184,13 @@ class AuthRequestDialog(tk.Toplevel):
         tk.Label(master, text='ToonGuard Code:').grid(row=0)
         self.tg_entry = tk.Entry(master)
         self.tg_entry.grid(row=0, column=1)
-        return self.tg_entry
-
-    def buttonbox(self):
         box = tk.Frame(self)
-        tk.Button(box, text='OK', width=10, command=self.confirm, default=tk.ACTIVE).grid(row=3)
-        tk.Button(box, text='Cancel', width=10, command=self.cancel).grid(row=3, column=1)
+        tk.Button(box, text='OK', width=10, command=self.confirm, default=tk.ACTIVE).pack(side=tk.LEFT)
+        tk.Button(box, text='Cancel', width=10, command=self.cancel).pack(side=tk.LEFT)
+        box.pack(side=tk.BOTTOM, padx=5, pady=5)
         self.bind('<Return>', self.confirm)
         self.bind('<Escape>', self.cancel)
+        return self.tg_entry
 
     def confirm(self, event=None):
         if not self.validate():
