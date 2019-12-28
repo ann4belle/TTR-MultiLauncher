@@ -1,2 +1,4 @@
 .vscode/*
 accounts.txt
+__pycache__/*
+installdir.txt

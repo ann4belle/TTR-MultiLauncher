@@ -1,13 +1,24 @@
 """Functions to update TTR, then allow the user to login to an account and launch the game."""
 import tkinter as tk
+from tkinter import filedialog
 import json
 import os
 import time
 import requests
+import updater
 
 class TTRLauncher(tk.Frame):
     """Main class for the TTR MultiLauncher"""
     def __init__(self, master=None):
+        while not os.path.exists('installdir.txt'):
+            installdir = filedialog.askdirectory(title='Select TTR Install Directory')
+            if installdir is None:
+                print('Please provide the installation directory.')
+                continue
+            with open('installdir.txt', 'a+') as file:
+                file.write(installdir)
+        with open('installdir.txt', 'r') as file:
+            updater.TTRUpdater(file.read())
         super().__init__(master)
         self.master = master
         self.pack()
@@ -30,22 +41,23 @@ class TTRLauncher(tk.Frame):
             for line in accfile:
                 line = line.split(',')
                 if not len(line) == 3:
-                    print('Error - accounts.txt malformed. Each line should follow this pattern: <label>,<username>,<password>')
-                    self.master.quit()
+                    continue
                 self.accts.append((line[0], line[1], line[2]))
         for acc in self.accts:
             self.toonlist.insert(tk.END, acc[0])
 
     def login(self):
-        self.do_request({'username': self.accts[self.toonlist.curselection() - 1][1], 'password': self.accts[self.toonlist.curselection() - 1][2]})
+        self.do_request({'username': self.accts[self.toonlist.curselection()[0] - 1][1], 'password': self.accts[self.toonlist.curselection()[0] - 1][2]})
 
     def do_request(self, data):
-        resp = json.loads(requests.post('https://www.toontownrewritten.com/api/login?format=json', data=data, headers={'Content-Type': 'application/x-www-form-urlencoded'}))
+        resp = json.loads(requests.post('https://www.toontownrewritten.com/api/login?format=json', data=data, headers={'Content-Type': 'application/x-www-form-urlencoded'}).content)
         success = resp.get('success', 'false')
         if success == 'true':
             os.environ['TTR_PLAYCOOKIE'] = resp.get('cookie', 'CookieNotFound')
             os.environ['TTR_GAMESERVER'] = resp.get('gameserver', 'ServerNotFound')
-            #TODO: Change to installdir
+            with open('installdir.txt', 'r') as file:
+                os.chdir(file.read())
+            #Automated relogging if user requests?
             if os.path.exists('TTREngine.exe'):
                 os.system('TTREngine.exe')
             elif os.path.exists('TTREngine'):
@@ -56,7 +68,6 @@ class TTRLauncher(tk.Frame):
             eta = int(resp.get('eta', 30))
             pos = resp.get('position', 'unknown')
             token = resp.get('queueToken', None)
-
             if token is None:
                 print("No queue token was returned. This shouldn't be possible! There may be a problem with the TTR login API.")
                 return
@@ -85,7 +96,7 @@ class TTRLauncher(tk.Frame):
         self.toonlist.insert(tk.END, dialog.label)
         self.toonlist.pack(side=tk.TOP, fill=tk.BOTH)
         with open('accounts.txt', 'a+') as accfile:
-            accfile.write(dialog.label + ',' + dialog.username + ',' + dialog.password)
+            accfile.write(dialog.label + ',' + dialog.username + ',' + dialog.password + '\n')
 
 class AcctRequestDialog(tk.Toplevel):
     """Simple class to request account information"""
@@ -151,7 +162,7 @@ class AcctRequestDialog(tk.Toplevel):
         self.password = self.pass_entry.get()
 
 class AuthRequestDialog(tk.Toplevel):
-    """Simple class to request account information"""
+    """Simple class to request ToonGuard auth code"""
     def __init__(self, parent, title=None):
         tk.Toplevel.__init__(self, parent)
         if title:

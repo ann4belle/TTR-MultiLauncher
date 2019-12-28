@@ -1,3 +1,4 @@
+"""Updates TTR"""
 import json
 import sys
 import hashlib
@@ -15,7 +16,6 @@ class TTRUpdater():
 
     def build_update_list(self, installdir):
         """Builds the list of files requiring an update based on the current operating system."""
-        #TODO: Sanitize path - turn \s into /s maybe?
         files = []
         ttrdir = pathlib.Path(installdir)
         if not ttrdir.is_dir():
