@@ -140,7 +140,7 @@ class AcctRequestDialog(tk.Toplevel):
         self.bind('<Return>', self.confirm)
         self.bind('<Escape>', self.cancel)
 
-    def confirm(self):
+    def confirm(self, event=None):
         if not self.validate():
             self.initial_focus.focus_set()
             return
@@ -149,7 +149,7 @@ class AcctRequestDialog(tk.Toplevel):
         self.apply()
         self.cancel()
 
-    def cancel(self):
+    def cancel(self, event=None):
         self.parent.focus_set()
         self.destroy()
 
