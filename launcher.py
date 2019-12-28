@@ -21,6 +21,7 @@ class TTRLauncher(tk.Frame):
             updater.TTRUpdater(file.read())
         super().__init__(master)
         self.master = master
+        self.master.minsize(200, 200)
         self.pack()
         self.create_widgets()
         self.load_accts()
@@ -134,9 +135,8 @@ class AcctRequestDialog(tk.Toplevel):
         return self.label_entry
 
     def buttonbox(self):
-        box = tk.Frame(self)
-        tk.Button(box, text='OK', width=10, command=self.confirm, default=tk.ACTIVE).grid(row=3)
-        tk.Button(box, text='Cancel', width=10, command=self.cancel).grid(row=3, column=1)
+        tk.Button(self, text='OK', width=10, command=self.confirm, default=tk.ACTIVE).grid(row=3)
+        tk.Button(self, text='Cancel', width=10, command=self.cancel).grid(row=3, column=1)
         self.bind('<Return>', self.confirm)
         self.bind('<Escape>', self.cancel)
 
@@ -195,7 +195,7 @@ class AuthRequestDialog(tk.Toplevel):
         self.bind('<Return>', self.confirm)
         self.bind('<Escape>', self.cancel)
 
-    def confirm(self):
+    def confirm(self, event=None):
         if not self.validate():
             self.initial_focus.focus_set()
             return
@@ -204,7 +204,7 @@ class AuthRequestDialog(tk.Toplevel):
         self.apply()
         self.cancel()
 
-    def cancel(self):
+    def cancel(self, event=None):
         self.parent.focus_set()
         self.destroy()
 
