@@ -22,15 +22,15 @@ class TTRLauncher(tk.Frame):
         super().__init__(master)
         self.master = master
         self.master.minsize(200, 200)
-        self.pack()
         self.create_widgets()
+        self.pack(expand=True)
         self.load_accts()
 
     def create_widgets(self):
         self.toonlist = tk.Listbox(self)
         self.login_b = tk.Button(self, text='Login', command=self.login)
         self.add_acct_b = tk.Button(self, text='Add Account', command=self.add_acct)
-        self.toonlist.pack(side=tk.TOP, fill=tk.BOTH)
+        self.toonlist.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         self.login_b.pack(side=tk.LEFT)
         self.add_acct_b.pack(side=tk.RIGHT)
         self.grid(padx=2, pady=(0, 2))
@@ -110,8 +110,9 @@ class AcctRequestDialog(tk.Toplevel):
         body = tk.Frame(self)
         self.initial_focus = self.body(body)
         body.pack(padx=5, pady=5)
-        self.buttonbox()
         self.grab_set()
+        self.bind('<Return>', self.confirm)
+        self.bind('<Escape>', self.cancel)
         self.label = None
         self.username = None
         self.password = None
@@ -137,8 +138,6 @@ class AcctRequestDialog(tk.Toplevel):
     def buttonbox(self):
         tk.Button(self, text='OK', width=10, command=self.confirm, default=tk.ACTIVE).grid(row=3)
         tk.Button(self, text='Cancel', width=10, command=self.cancel).grid(row=3, column=1)
-        self.bind('<Return>', self.confirm)
-        self.bind('<Escape>', self.cancel)
 
     def confirm(self, event=None):
         if not self.validate():
