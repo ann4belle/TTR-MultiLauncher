@@ -5,6 +5,7 @@ import json
 import os
 import time
 import requests
+import threading
 import updater
 
 class TTRLauncher(tk.Frame):
@@ -49,7 +50,22 @@ class TTRLauncher(tk.Frame):
             self.toonlist.insert(tk.END, acc[0])
 
     def login(self):
-        self.do_request({'username': self.accts[self.toonlist.curselection()[0]][1].strip(), 'password': self.accts[self.toonlist.curselection()[0]][2].strip()})
+        selected_indices = self.toonlist.curselection()
+        if not selected_indices:
+            print("No account selected.")
+            return
+
+        for index in selected_indices:
+            acct = self.accts[index]
+            thread = threading.Thread(target=self.launch_account, args=(acct,))
+            thread.start()
+
+    def launch_account(self, account):
+        username = account[1].strip()
+        password = account[2].strip()
+
+        data = {'username': username, 'password': password}
+        self.do_request(data)
 
     def do_request(self, data):
         resp = json.loads(requests.post('https://www.toontownrewritten.com/api/login?format=json', data=data, headers={'Content-Type': 'application/x-www-form-urlencoded'}).content)
